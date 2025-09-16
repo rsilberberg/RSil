@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calendario Prenotazioni</title>
+  <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/main.min.css" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/main.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+    h1 {
+      text-align: center;
+    }
+    #calendar {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+  </style>
+</head>
+<body>
+  <h1>Calendario Prenotazioni</h1>
+  <p style="text-align:center;">Clicca su uno slot per prenotarlo. Verrà segnato come “Occupato”.</p>
+  <div id="calendar"></div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const calendarEl = document.getElementById('calendar');
+
+      const calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'timeGridWeek', // vista settimanale con orari
+        selectable: true,            // consente di selezionare slot
+        select: function(info) {
+          const conferma = confirm('Vuoi prenotare questo slot?\n' + info.startStr + ' - ' + info.endStr);
+          if (conferma) {
+            // aggiunge evento "Occupato" sul calendario
+            calendar.addEvent({
+              start: info.start,
+              end: info.end,
+              title: 'Occupato',
+              color: '#d9534f'
+            });
+          }
+        }
+      });
+
+      calendar.render();
+    });
+  </script>
+</body>
+</html>
