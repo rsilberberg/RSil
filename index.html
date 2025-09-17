@@ -5,27 +5,71 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Calendario Prenotazioni</title>
 
-  <!-- FullCalendar CSS + JS dal CDN funzionante -->
+  <!-- FullCalendar CSS + JS dal CDN -->
   <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css" rel="stylesheet" />
   <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
 
   <style>
+    /* sfondo pagina verde pastello */
     body {
       font-family: Arial, sans-serif;
-      margin: 20px;
+      margin: 0;
+      background-color: #b6e2b6; /* verde pastello */
+      overflow-x: hidden;
+      height: 100vh; /* prende tutto l’altezza */
     }
-    h1 {
+
+    h1, p {
       text-align: center;
     }
+
+    /* contenitore calendario prende tutta la pagina senza scroll */
     #calendar {
-      max-width: 900px;
-      margin: 40px auto;
+      max-width: 95%;
+      height: 80vh;
+      margin: 0 auto;
+      background: linear-gradient(135deg, #ff7f7f, #ff4d4d); /* rosso sfumato */
+      padding: 10px;
+      border-radius: 10px;
+      box-sizing: border-box;
+    }
+
+    /* animazione rospi */
+    .frog {
+      position: absolute;
+      width: 40px;
+      height: 40px;
+      background-image: url('https://upload.wikimedia.org/wikipedia/commons/thumb/3/3f/Frog_icon.svg/48px-Frog_icon.svg.png');
+      background-size: contain;
+      background-repeat: no-repeat;
+      animation: jump 5s infinite;
+    }
+
+    @keyframes jump {
+      0% {transform: translate(0,0);}
+      25% {transform: translate(30px,-30px);}
+      50% {transform: translate(60px,0);}
+      75% {transform: translate(90px,-30px);}
+      100% {transform: translate(0,0);}
+    }
+
+    /* fascia prenotabile evidenziata */
+    .prenotabile {
+      background-color: rgba(255, 255, 0, 0.2) !important; /* giallo trasparente */
     }
   </style>
 </head>
 <body>
   <h1>Calendario Prenotazioni</h1>
-  <p style="text-align:center;">Clicca su uno slot per prenotarlo. Verrà segnato come “Occupato”.</p>
+  <p>Clicca su uno slot (8-19) per prenotarlo. Verrà segnato come “Occupato”.</p>
+
+  <!-- rospi sparsi -->
+  <div class="frog" style="top:10%;left:5%;animation-delay:0s;"></div>
+  <div class="frog" style="top:30%;left:40%;animation-delay:1s;"></div>
+  <div class="frog" style="top:60%;left:20%;animation-delay:2s;"></div>
+  <div class="frog" style="top:80%;left:70%;animation-delay:3s;"></div>
+  <div class="frog" style="top:50%;left:90%;animation-delay:4s;"></div>
+
   <div id="calendar"></div>
 
   <script>
@@ -33,12 +77,23 @@
       const calendarEl = document.getElementById('calendar');
 
       const calendar = new FullCalendar.Calendar(calendarEl, {
-        initialView: 'timeGridWeek', // vista settimanale con orari
-        selectable: true,            // consente di selezionare slot
+        initialView: 'timeGridWeek',
+        height: 'auto', // tutto visibile
+        selectable: true,
+        allDaySlot: false, // elimina fascia "All day"
+        locale: 'it', // nomi giorni in italiano
+        slotMinTime: '08:00:00', // fascia oraria minima
+        slotMaxTime: '19:00:00', // fascia oraria massima
+
         select: function(info) {
-          const conferma = confirm('Vuoi prenotare questo slot?\n' + info.startStr + ' - ' + info.endStr);
+          // Pop-up personalizzato con riepilogo
+          const start = new Date(info.start);
+          const end = new Date(info.end);
+          const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour:'2-digit', minute:'2-digit' };
+          const startStr = start.toLocaleDateString('it-IT', options);
+          const endStr = end.toLocaleTimeString('it-IT', {hour:'2-digit',minute:'2-digit'});
+          const conferma = confirm(`Vuoi prenotare questo slot?\nData: ${startStr}\nFino alle: ${endStr}`);
           if (conferma) {
-            // aggiunge evento "Occupato" sul calendario
             calendar.addEvent({
               start: info.start,
               end: info.end,
@@ -46,7 +101,15 @@
               color: '#d9534f'
             });
           }
-        }
+        },
+        // evidenzia fascia prenotabile (8-19)
+        businessHours: [
+          {
+            daysOfWeek: [1, 2, 3, 4, 5, 6, 0], // tutti i giorni
+            startTime: '08:00',
+            endTime: '19:00'
+          }
+        ]
       });
 
       calendar.render();
